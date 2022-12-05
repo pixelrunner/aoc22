@@ -19,7 +19,8 @@ def day1():
 
         fileLine = f.readline()
 
-    # print(max(elfTotals.values()))
+    print(max(elfTotals.values()))
+
     highest3Elves = nlargest(3, elfTotals, key=elfTotals.get)
     calorieTotal = 0
     for i in highest3Elves:
