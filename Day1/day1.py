@@ -1,3 +1,5 @@
+from heapq import nlargest
+
 def day1():
     elfNumber = 1
     calorieTotal = 0
@@ -17,9 +19,13 @@ def day1():
 
         fileLine = f.readline()
 
-    maxElf = max(elfTotals, key=elfTotals.get)
-    print(maxElf)
+    # print(max(elfTotals.values()))
+    highest3Elves = nlargest(3, elfTotals, key=elfTotals.get)
+    calorieTotal = 0
+    for i in highest3Elves:
+        calorieTotal = calorieTotal + elfTotals[i]
 
+    print(calorieTotal)
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     day1()
