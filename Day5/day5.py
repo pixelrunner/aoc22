@@ -7,19 +7,22 @@
 
 
 def buildStacks(f):
-    stacks = {}
+    stacks = []
     tempLines = []
 
     # store all crate lines in temporary list
-    # store final line (crate numbers) in a list
+    # --- store final line (crate numbers) in a list
 
     fileLine = f.readline().replace("\n", "")
     while "[" in fileLine:
         tempLines.append(fileLine)
         fileLine = f.readline().replace("\n", "")
     else:
-        for box in fileLine.replace("  "," ").strip().split():
-            stacks[int(box)] = []
+        cratesLine = fileLine.replace("  "," ").strip().split()
+        noOfCrates = int(cratesLine[-1])
+
+        for x in range(0, noOfCrates):
+            stacks.append([])
 
     for line in tempLines:
         letternumber = 0
@@ -29,12 +32,14 @@ def buildStacks(f):
             if letter == "]": foundCrate = False
             if foundCrate == True:
                 cratenumber = int(((letternumber-1)/4)+1)
-                stacks[cratenumber].insert(0, letter)
+                stacks[cratenumber-1].insert(0, letter)
 
             if letter == "[": foundCrate = True
 
-
             letternumber += 1
+
+    stacks = [tuple(crateStacks) for crateStacks in stacks]
+
     return stacks
 
 
@@ -54,34 +59,35 @@ def createInstructionsList(f):
     else:
         return instructions
 
-def moveCrates(stacks, amount, origin, destination, partNo):
+def moveCrates(stacksList, amount, origin, destination, partNo):
+    # stacksList = list(stacks)
     if partNo == "P1":
         for x in range(0, amount):
-            crate = stacks[origin].pop()
-            stacks[destination].append(crate)
+            crate = stacksList[origin-1].pop()
+            stacksList[destination-1].append(crate)
     elif partNo == "P2":
         cratesMoving = []
         for x in range(0, amount):
-            cratesMoving.append(stacks[origin].pop())
+            cratesMoving.insert(0, stacksList[origin-1].pop())
 
         for crate in cratesMoving:
-            stacks[destination].append(crate)
+            stacksList[destination-1].append(crate)
 
-    return stacks
+    return stacksList
 
 
 def followInstructions(instructions, stacks, partNo):
+    stacksList = [list(tup) for tup in stacks]
     for instruction in instructions:
         if instruction[0] == "move":
-            stacks = moveCrates(stacks, int(instruction[1]), int(instruction[3]), int(instruction[5]), partNo)
+            stacksList = moveCrates(stacksList, int(instruction[1]), int(instruction[3]), int(instruction[5]), partNo)
 
-    return stacks
+    return stacksList
 
 
 def topCrates(stacks):
     lastItems = ""
-    for stack in stacks.values():
-
+    for stack in stacks:
         lastItems = lastItems + stack[-1]
 
     return lastItems
@@ -90,18 +96,14 @@ def topCrates(stacks):
 def main():
     f = open("input.txt", "r")
 
-    stacks = buildStacks(f)
+    stacks = tuple(buildStacks(f))
     instructions = createInstructionsList(f)
 
-    print(stacks)
-
     stacksP1 = followInstructions(instructions, stacks, "P1")
-    # print(topCrates(stacksP1))
+    print(topCrates(stacksP1))
 
-    print(stacks)
-
-    # stacksP2 = followInstructions(instructions, stacks, "P2")
-    # print(topCrates(stacksP2))
+    stacksP2 = followInstructions(instructions, stacks, "P2")
+    print(topCrates(stacksP2))
 
 
 
