@@ -21,7 +21,7 @@ def isOverlapping(fileLine):
 
 def main():
     f = open("input.txt", "r")
-    fileLine = f.readline().replace(" ","").replace("\n", "")M
+    fileLine = f.readline().replace(" ","").replace("\n", "")
     p1CumulativeTotal = 0
     p2CumulativeTotal = 0
 
