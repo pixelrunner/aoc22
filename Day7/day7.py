@@ -1,6 +1,10 @@
 # {directory_path: [[file, size],[file, size], [file, size]],
 #  directory_path: [[file, size],[file, size]]}
 
+TESTING = 0
+HDSIZE = 70000000
+SPACENEEDED = 30000000
+
 
 def convertToTuple (itemToConvert):
     # convert lists of lists inside a dictionary to tuples of tuples inside a dictionary
@@ -14,7 +18,11 @@ def buildTree():
     # loop through cli and build dictionary of directories and every file in each of them wth their sizes
     filesAndDirs = {}
     currentPath = ""
-    f = open("input.txt", "r")
+    if TESTING:
+        f = open("sample_input.txt", "r")
+    else:
+        f = open("input.txt", "r")
+
     cliLine = f.readline().replace("/n", "").strip().split()
 
     while cliLine != []:
@@ -26,7 +34,9 @@ def buildTree():
             currentPath = (currentPath + "/" + cliLine[2]).replace("//", "/")
             filesAndDirs[currentPath] = []
         elif cliLine[0].isalnum():
-            filesAndDirs[currentPath].append([cliLine[1], cliLine[0]])
+            # check for duplicate and add to list if no duplicate
+            if [cliLine[1], cliLine[0]] not in filesAndDirs[currentPath]:
+                filesAndDirs[currentPath].append([cliLine[1], cliLine[0]])
         elif cliLine[1] == "cd" and cliLine[2] == "..":
             currentPath = currentPath.rsplit("/", 1)[0]
 
@@ -46,15 +56,45 @@ def buildSummary(directoryTree):
     return summaryDict
 
 
+def calculateCumTotals(directorySummary):
+    cumDict = {}
+    for pathOrigin in directorySummary.keys():
+        cumTotal = 0
+        for pathDest in directorySummary.keys():
+            if pathDest.startswith(pathOrigin):
+                cumTotal += directorySummary[pathDest]
+        cumDict[pathOrigin] = cumTotal
+    return cumDict
+
+
 def part1answer(directorySummary):
     return sum(v for v in directorySummary.values() if v <= 100000)
 
+def part2answer(directorySummary):
+    # get minimum space needed to delete
+    minimum_value = SPACENEEDED - (HDSIZE - directorySummary["/"])
+
+    fileSizeOfNextSmallest = min(i for i in directorySummary.values() if i > minimum_value)
+
+    return fileSizeOfNextSmallest
 
 def main():
     filesAndDirs = buildTree()
-    directorySummary = buildSummary(filesAndDirs)
+    individualDirectorySummary = buildSummary(filesAndDirs)
+    cumDirectorySummary = calculateCumTotals(individualDirectorySummary)
 
-    print(part1answer(directorySummary))
+    if TESTING:
+        print(filesAndDirs)
+        print(individualDirectorySummary)
+        print(cumDirectorySummary)
+
+    print(part1answer(cumDirectorySummary))
+
+    print(part2answer(cumDirectorySummary))
+
+
+
+
 
 
 if __name__ == '__main__':
